@@ -141,6 +141,7 @@ local request_code_action = function(params)
         if response.result then
             local client = vim.lsp.get_client_by_id(client_id)
             for _, result in pairs(response.result) do
+                result.client_id = client_id
                 result.client_name = client and client.name or ""
                 table.insert(commands, result)
             end
@@ -169,9 +170,10 @@ end
 local function lsp_execute_command(val)
     -- table.insert(command.arguments,{data=' '})
     -- vim.lsp.buf_request(bn,'workspace/executeCommand', command)
+    local offset_encoding = vim.lsp.get_client_by_id(val.client_id).offset_encoding
     if val.edit or type(val.command) == 'table' then
         if val.edit then
-            vim.lsp.util.apply_workspace_edit(val.edit)
+            vim.lsp.util.apply_workspace_edit(val.edit, offset_encoding)
         end
         if type(val.command) == 'table' then
             vim.lsp.buf.execute_command(val.command)
